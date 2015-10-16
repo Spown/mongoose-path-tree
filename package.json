@@ -6,21 +6,25 @@
     "Tomáš Holas <tomas.holas@gmail.com>",
     "Oleg Butovich <obutovich@gmail.com>",
     "Jake Dempsey <angelo0000@gmail.com>",
-    "Alban Escalier (DaWyz)"
+    "Alban Escalier (DaWyz)",
+    "Spown"
   ],
   "name": "mongoose-path-tree",
   "description": "Maintaied version of materialized path hierarchy for mongoose with reparent option",
-  "homepage": "https://github.com/swayf/mongoose-path-tree",
+  "homepage": "https://github.com/Spown/mongoose-path-tree",
   "repository": {
     "type": "git",
-    "url": "git://github.com/swayf/mongoose-path-tree.git"
+    "url": "git://github.com/Spown/mongoose-path-tree.git"
   },
   "main": "index.js",
-  "version": "1.3.5",
-  "engine": "node >= 0.8.0",
+  "version": "1.3.6",
+  "engines": {
+    "node": "^4.2.1",
+    "npm": "^2.14.8"
+  },
   "dependencies": {
-    "mongoose": "3.8.x",
-    "stream-worker": "0.x.x"
+    "mongoose": "^4.1.11",
+    "stream-worker": "^0.0.1"
   },
   "devDependencies": {
     "async": "0.x.x",
