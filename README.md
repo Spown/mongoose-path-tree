@@ -55,7 +55,7 @@ adam.save(function() {
 ```
 
 At this point in mongoDB you will have documents similar to
-```json
+```js
     {
       "_id" : ObjectId("50136e40c78c4b9403000001"),
       "name" : "Adam",
