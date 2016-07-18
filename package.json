@@ -22,10 +22,10 @@
     "node": "0.10 - 5.11.0"
   },
   "dependencies": {
-    "mongoose": "^4.4.12",
     "stream-worker": "^1.0.1"
   },
   "devDependencies": {
+    "mongoose": "^4.4.12",
     "async": "^1.5.2",
     "codeclimate-test-reporter": "^0.3.1",
     "istanbul": "^0.4.3",
