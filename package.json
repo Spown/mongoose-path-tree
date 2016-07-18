@@ -11,10 +11,10 @@
   ],
   "name": "mongoose-path-tree",
   "description": "Maintaied version of materialized path hierarchy for mongoose with reparent option",
-  "homepage": "https://github.com/Spown/mongoose-path-tree",
+  "homepage": "https://github.com/swayf/mongoose-path-tree",
   "repository": {
     "type": "git",
-    "url": "git://github.com/Spown/mongoose-path-tree.git"
+    "url": "git://github.com/swayf/mongoose-path-tree.git"
   },
   "main": "index.js",
   "version": "1.3.7",
@@ -22,21 +22,23 @@
     "node": "0.10 - 5.11.0"
   },
   "dependencies": {
-    "mongoose": "^4.1.11",
-    "stream-worker": "^0.0.1"
+    "mongoose": "^4.4.12",
+    "stream-worker": "^1.0.1"
   },
   "devDependencies": {
-    "async": "0.x.x",
-    "should": "1.x.x",
-    "lodash": "2.x.x",
-    "mocha": "1.x.x",
-    "shortid": "2.0.0"
+    "async": "^1.5.2",
+    "codeclimate-test-reporter": "^0.3.1",
+    "istanbul": "^0.4.3",
+    "lodash": "^4.11.1",
+    "mocha": "^2.4.5",
+    "shortid": "^2.2.6",
+    "should": "^8.3.1"
   },
   "directories": {
     "test": "test"
   },
   "scripts": {
-    "test": "MONGOOSE_TREE_SHORTID=1 ./node_modules/.bin/mocha && MONGOOSE_TREE_SHORTID=0 ./node_modules/.bin/mocha"
+    "test": "./node_modules/.bin/istanbul cover ./node_modules/.bin/_mocha"
   },
   "keywords": [
     "mongoose",
