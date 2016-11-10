@@ -375,6 +375,26 @@ describe('tree tests', function () {
             });
         });
 
+        it("should return complete children tree sorted on name", function (done) {
+
+            User.getChildrenTree({options: {sort: {name: -1}}}, function (err, childrenTree) {
+
+                should.not.exist(err);
+                childrenTree.length.should.equal(2);
+
+                childrenTree[0].name.should.equal('Eden');
+                _.map(childrenTree, 'name').should.containEql('Adam').and.containEql('Eden');
+
+                var adamTree = _.find(childrenTree, function(x){ return x.name == 'Adam'});
+
+                adamTree.children.length.should.equal(2);
+                adamTree.children[0].name.should.equal('Carol');
+                _.map(adamTree.children, 'name').should.containEql('Bob').and.containEql('Carol');
+
+                done();
+            });
+        });
+
         it("should return adam's children tree", function (done) {
 
             User.findOne({ 'name': 'Adam' }, function (err, adam) {
@@ -397,6 +417,22 @@ describe('tree tests', function () {
 
                     done();
                 });
+            });
+        });
+
+        it("should return adam's complete children tree sorted on name", function (done) {
+            User.findOne({ 'name': 'Adam' }, function (err, adam) {
+
+              adam.getChildrenTree({allowEmptyChildren: false, options: {sort: {name: -1}}}, function (err, childrenTree) {
+
+                  should.not.exist(err);
+
+                  childrenTree.length.should.equal(2);
+                  childrenTree[0].name.should.equal('Carol');
+                  _.map(childrenTree, 'name').should.containEql('Bob').and.containEql('Carol');
+
+                  done();
+              });
             });
         });
     });
