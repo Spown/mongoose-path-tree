@@ -423,16 +423,16 @@ describe('tree tests', function () {
         it("should return adam's complete children tree sorted on name", function (done) {
             User.findOne({ 'name': 'Adam' }, function (err, adam) {
 
-              adam.getChildrenTree({allowEmptyChildren: false, options: {sort: {name: -1}}}, function (err, childrenTree) {
+                adam.getChildrenTree({allowEmptyChildren: false, options: {sort: {name: -1}}}, function (err, childrenTree) {
 
-                  should.not.exist(err);
+                    should.not.exist(err);
 
-                  childrenTree.length.should.equal(2);
-                  childrenTree[0].name.should.equal('Carol');
-                  _.map(childrenTree, 'name').should.containEql('Bob').and.containEql('Carol');
+                    childrenTree.length.should.equal(2);
+                    childrenTree[0].name.should.equal('Carol');
+                    _.map(childrenTree, 'name').should.containEql('Bob').and.containEql('Carol');
 
-                  done();
-              });
+                    done();
+                });
             });
         });
     });
