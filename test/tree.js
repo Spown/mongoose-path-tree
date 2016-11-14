@@ -17,7 +17,8 @@ describe('tree tests', function () {
     };
 
     var pluginOptions = {
-        pathSeparator: '.'
+        pathSeparator: '.',
+        treeOrdering: true
     };
 
     if (process.env.MONGOOSE_TREE_SHORTID === '1') {
