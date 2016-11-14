@@ -435,5 +435,31 @@ describe('tree tests', function () {
                 });
             });
         });
+
+        it("should return bob's siblings and self", function(done) {
+            User.findOne({ name: 'Bob' }, function(err, bob) {
+                bob.siblingsAndSelf(function(err, siblings) {
+                    should.not.exist(err);
+
+                    siblings.length.should.equal(2);
+                    _.map(siblings, 'name').should.containEql('Bob').and.containEql('Carol');
+
+                    done();
+                });
+            });
+        });
+
+        it("should return bob's siblings without self", function(done) {
+            User.findOne({ name: 'Bob' }, function(err, bob) {
+                bob.siblings(function(err, siblings) {
+                    should.not.exist(err);
+
+                    siblings.length.should.equal(1);
+                    _.map(siblings, 'name').should.containEql('Carol');
+
+                    done();
+                });
+            });
+        });
     });
 });
