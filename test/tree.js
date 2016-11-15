@@ -183,6 +183,21 @@ describe('tree tests', function () {
                 });
             });
         });
+
+        it('should move position', function(done) {
+            User.findOne({name: 'Adam'}, function(err, adam) {
+                adam.moveToPosition(1, function(err, adamWithNewPosition) {
+                    should.not.exist(err);
+                    adamWithNewPosition.position.should.equal(1);
+
+                    User.findOne({name: 'Eden'}, function(err, eden) {
+                        eden.position.should.equal(0);
+                        done();
+                    });
+                });
+            });
+        });
+
     });
 
 
