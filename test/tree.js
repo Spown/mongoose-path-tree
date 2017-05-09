@@ -198,6 +198,19 @@ describe('tree tests', function () {
             });
         });
 
+        it('should update position if change parent', function(done) {
+            User.findOne({name: 'Dann'}, function(err, dann) {
+                User.findOne({name: 'Adam'}, function(err, adam) {
+                  dann.parent = adam;
+                  dann.save(function(e, d) {
+                      should.not.exist(e);
+                      d.position.should.equal(2);
+                      done();
+                  });
+                });
+            });
+        });
+
     });
 
 
