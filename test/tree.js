@@ -17,7 +17,8 @@ describe('tree tests', function () {
     };
 
     var pluginOptions = {
-        pathSeparator: '.'
+        pathSeparator: '.',
+        treeOrdering: true
     };
 
     if (process.env.MONGOOSE_TREE_SHORTID === '1') {
@@ -182,6 +183,34 @@ describe('tree tests', function () {
                 });
             });
         });
+
+        it('should move position', function(done) {
+            User.findOne({name: 'Adam'}, function(err, adam) {
+                adam.moveToPosition(1, function(err, adamWithNewPosition) {
+                    should.not.exist(err);
+                    adamWithNewPosition.position.should.equal(1);
+
+                    User.findOne({name: 'Eden'}, function(err, eden) {
+                        eden.position.should.equal(0);
+                        done();
+                    });
+                });
+            });
+        });
+
+        it('should update position if change parent', function(done) {
+            User.findOne({name: 'Dann'}, function(err, dann) {
+                User.findOne({name: 'Adam'}, function(err, adam) {
+                  dann.parent = adam;
+                  dann.save(function(e, d) {
+                      should.not.exist(e);
+                      d.position.should.equal(2);
+                      done();
+                  });
+                });
+            });
+        });
+
     });
 
 
@@ -375,6 +404,26 @@ describe('tree tests', function () {
             });
         });
 
+        it("should return complete children tree sorted on name", function (done) {
+
+            User.getChildrenTree({options: {sort: {name: -1}}}, function (err, childrenTree) {
+
+                should.not.exist(err);
+                childrenTree.length.should.equal(2);
+
+                childrenTree[0].name.should.equal('Eden');
+                _.map(childrenTree, 'name').should.containEql('Adam').and.containEql('Eden');
+
+                var adamTree = _.find(childrenTree, function(x){ return x.name == 'Adam'});
+
+                adamTree.children.length.should.equal(2);
+                adamTree.children[0].name.should.equal('Carol');
+                _.map(adamTree.children, 'name').should.containEql('Bob').and.containEql('Carol');
+
+                done();
+            });
+        });
+
         it("should return adam's children tree", function (done) {
 
             User.findOne({ 'name': 'Adam' }, function (err, adam) {
@@ -394,6 +443,48 @@ describe('tree tests', function () {
                     danTree.children.length.should.equal(1);
                     danTree.children[0].name.should.equal('Emily');
                     emilyTree.children.length.should.equal(0);
+
+                    done();
+                });
+            });
+        });
+
+        it("should return adam's complete children tree sorted on name", function (done) {
+            User.findOne({ 'name': 'Adam' }, function (err, adam) {
+
+                adam.getChildrenTree({allowEmptyChildren: false, options: {sort: {name: -1}}}, function (err, childrenTree) {
+
+                    should.not.exist(err);
+
+                    childrenTree.length.should.equal(2);
+                    childrenTree[0].name.should.equal('Carol');
+                    _.map(childrenTree, 'name').should.containEql('Bob').and.containEql('Carol');
+
+                    done();
+                });
+            });
+        });
+
+        it("should return bob's siblings and self", function(done) {
+            User.findOne({ name: 'Bob' }, function(err, bob) {
+                bob.siblingsAndSelf(function(err, siblings) {
+                    should.not.exist(err);
+
+                    siblings.length.should.equal(2);
+                    _.map(siblings, 'name').should.containEql('Bob').and.containEql('Carol');
+
+                    done();
+                });
+            });
+        });
+
+        it("should return bob's siblings without self", function(done) {
+            User.findOne({ name: 'Bob' }, function(err, bob) {
+                bob.siblings(function(err, siblings) {
+                    should.not.exist(err);
+
+                    siblings.length.should.equal(1);
+                    _.map(siblings, 'name').should.containEql('Carol');
 
                     done();
                 });
