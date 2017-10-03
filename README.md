@@ -25,6 +25,7 @@ Model.plugin(tree, {
   onDelete :      'REPARENT',       // Can be set to 'DELETE' or 'REPARENT'. Default: 'DELETE'
   numWorkers:     5,                // Number of stream workers. Default: 5
   idType:         Schema.ObjectId   // Type used for _id. Default: This Model Schema's _id type
+  treeOrdering: false || 'position_field_name' // adds a "position" field for siblings on the same level to be moved and swapped
 })
 ```
 
@@ -178,6 +179,32 @@ carol.getAncestors(function(err, users) {
   // users as an array [adam, bob] (older -> younger)
 })
 ```
+
+### getSiblingsAndSelf
+alias: siblingsAndSelf
+```js
+doc.getSiblingsAndSelf(function(err, docs) {
+  
+});
+```
+Returns this document's siblings and itself in an array
+
+### getSiblings
+alias: siblings
+```js
+doc.getSiblings(function(err, docs) {
+  
+});
+```
+Returns this document's siblings in an array
+
+### moveToPosition
+```js
+doc.moveToPosition(positin, function(err, docs) {
+  
+});
+```
+Move this node to the specified position (number, zero-based) on the same level and swaps it with the other doc (also changes the target doc's position field value)
 
 ### level
 

@@ -1,14 +1,15 @@
-var Mongoose = require('mongoose');
-var Tree = require('../lib/tree');
-var Async = require('async');
-var should = require('should');
-var _ = require('lodash');
-var shortId = require('shortid');
-
-var Schema = Mongoose.Schema;
-
+var Mongoose = require('mongoose'),
+    Tree = require('../lib/tree'),
+    Async = require('async'),
+    should = require('should'),
+    _ = require('lodash'),
+    shortId = require('shortid'),
+    Schema = Mongoose.Schema
+;
+if ('undefined' !== typeof Promise) {
+    Mongoose.Promise = Promise;
+} 
 Mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/mongoose-path-tree');
-
 
 describe('tree tests', function () {
 
@@ -30,7 +31,7 @@ describe('tree tests', function () {
             }
         };
 
-        pluginOptions.idType = String
+        pluginOptions.idType = String;
     }
 
     // Schema for tests
@@ -45,15 +46,15 @@ describe('tree tests', function () {
 
             should.not.exist(err);
 
-            var adam = new User({name: 'Adam' });
-            var eden = new User({name: 'Eden' });
-            var bob = new User({name: 'Bob', parent: adam });
-            var carol = new User({name: 'Carol', parent: adam });
-            var dann = new User({name: 'Dann', parent: carol });
-            var emily = new User({name: 'Emily', parent: dann });
-
-            Async.forEachSeries([adam, bob, carol, dann, emily, eden], function (doc, cb) {
-
+            var adam = new User({name: 'Adam' }),
+                    bob = new User({name: 'Bob', parent: adam }),
+                    carol = new User({name: 'Carol', parent: adam }),
+                        dann = new User({name: 'Dann', parent: carol }),
+                            emily = new User({name: 'Emily', parent: dann }),
+                    falko = new User({name: 'Falko', parent: adam }),
+                eden = new User({name: 'Eden' })
+            ;
+            Async.forEachSeries([adam, bob, carol, falko, dann, emily, eden], function (doc, cb) {
                 doc.save(cb);
             }, done);
         });
@@ -102,7 +103,7 @@ describe('tree tests', function () {
                     User.find(function (err, users) {
 
                         should.not.exist(err);
-                        users.length.should.equal(5);
+                        users.length.should.equal(6);
                         _.map(users, 'name').should.not.containEql('Emily');
                         done();
                     });
@@ -124,7 +125,7 @@ describe('tree tests', function () {
 
                         should.not.exist(err);
 
-                        users.length.should.equal(3);
+                        users.length.should.equal(4);
                         _.map(users, 'name').should.containEql('Adam').and.containEql('Bob');
                         done();
                     });
@@ -204,7 +205,7 @@ describe('tree tests', function () {
                   dann.parent = adam;
                   dann.save(function(e, d) {
                       should.not.exist(e);
-                      d.position.should.equal(2);
+                      d.position.should.equal(3);
                       done();
                   });
                 });
@@ -241,7 +242,7 @@ describe('tree tests', function () {
 
                     should.not.exist(err);
 
-                    users.length.should.equal(2);
+                    users.length.should.equal(3);
                     _.map(users, 'name').should.containEql('Bob').and.containEql('Carol');
                     done();
                 });
@@ -369,6 +370,63 @@ describe('tree tests', function () {
         });
     });
 
+    describe('get siblings', function () {
+
+        it("should find siblings", function (done) {
+            User.findOne({ 'name': 'Bob' }, function (err, bob) {
+                if (err) { done(err); }
+                bob.getSiblings(function (err, sibs) {
+                    if (err) { done(err); }
+                    should.equal(sibs.length, 2, 'should find exactly 2 sibling document');
+                    should.equal(sibs[0].name, 'Carol', 'wrong sibling');
+                    should.equal(sibs[1].name, 'Falko', 'wrong sibling');
+                    done();
+                });
+            });
+        });
+
+        it("should find siblings and self", function (done) {
+            User.findOne({ 'name': 'Bob' }, function (err, bob) {
+                if (err) { done(err); }
+                bob.getSiblingsAndSelf(function (err, sibs) {
+                    if (err) { done(err); }
+                    should.equal(sibs.length, 3, 'should find exactly 3 documents');
+                    should.equal(sibs[0].name, 'Bob', 'wrong self');
+                    should.equal(sibs[1].name, 'Carol', 'wrong sibling');
+                    should.equal(sibs[2].name, 'Falko', 'wrong sibling');
+                    done();
+                });
+            });
+        });
+
+    });
+
+    describe('move sibling position', function () {
+        it("should swap siblings", function (done) {
+            User.findOne({ 'name': 'Bob' }, function (err, bob) {
+                if (err) { done(err); }
+                bob.getSiblingsAndSelf(function (err, sibs) {
+                    var initPositions = [];
+                    if (err) { done(err); }
+                    should.equal(sibs.length, 3, 'should find exactly 3 documents');
+                    for (var idx = 0; idx < sibs.length; idx++) {
+                        var doc = sibs[idx];
+                        initPositions[doc.position] = doc;
+                    }
+                    initPositions[initPositions.length-1].moveToPosition(initPositions.length-2, function (err, doc) {
+                        if (err) { done(err); }
+                        should.notEqual(initPositions.length-1, doc.position, 'the meved doc\'s position didn\'t chage');
+                        User.findById(initPositions[initPositions.length-2]._id, function (err, doc2) {
+                            if (err) { done(err); }
+                            should.notEqual(doc2.position, initPositions.length-2, 'the target doc\'s position didn\'t chage');
+                            should.equal(doc2.position, initPositions.length-1, 'the target doc\'s position didn\'t chage to moved doc\'s position');
+                            done();
+                        });
+                    });
+                });
+            });
+        });        
+    });
 
     describe('get children tree', function () {
 
@@ -379,17 +437,17 @@ describe('tree tests', function () {
                 should.not.exist(err);
                 childrenTree.length.should.equal(2);
 
-                var adamTree = _.find(childrenTree, function(x){ return x.name == 'Adam'});
-                var edenTree = _.find(childrenTree, function(x){ return x.name == 'Eden'});
+                var adamTree = _.find(childrenTree, function(x){ return x.name == 'Adam';});
+                var edenTree = _.find(childrenTree, function(x){ return x.name == 'Eden';});
 
-                var bobTree = _.find(adamTree.children, function(x){ return x.name == 'Bob'});
+                var bobTree = _.find(adamTree.children, function(x){ return x.name == 'Bob';});
 
-                var carolTree = _.find(adamTree.children, function(x){ return x.name == 'Carol'});
-                var danTree = _.find(carolTree.children, function(x){ return x.name == 'Dann'});
-                var emilyTree = _.find(danTree.children, function(x){ return x.name == 'Emily'});
+                var carolTree = _.find(adamTree.children, function(x){ return x.name == 'Carol';});
+                var danTree = _.find(carolTree.children, function(x){ return x.name == 'Dann';});
+                var emilyTree = _.find(danTree.children, function(x){ return x.name == 'Emily';});
 
 
-                adamTree.children.length.should.equal(2);
+                adamTree.children.length.should.equal(3);
                 edenTree.children.length.should.equal(0);
 
                 bobTree.children.length.should.equal(0);
@@ -414,10 +472,10 @@ describe('tree tests', function () {
                 childrenTree[0].name.should.equal('Eden');
                 _.map(childrenTree, 'name').should.containEql('Adam').and.containEql('Eden');
 
-                var adamTree = _.find(childrenTree, function(x){ return x.name == 'Adam'});
+                var adamTree = _.find(childrenTree, function(x){ return x.name == 'Adam';});
 
-                adamTree.children.length.should.equal(2);
-                adamTree.children[0].name.should.equal('Carol');
+                adamTree.children.length.should.equal(3);
+                adamTree.children[0].name.should.equal('Falko');
                 _.map(adamTree.children, 'name').should.containEql('Bob').and.containEql('Carol');
 
                 done();
@@ -432,11 +490,11 @@ describe('tree tests', function () {
 
                     should.not.exist(err);
 
-                    var bobTree = _.find(childrenTree, function(x){ return x.name == 'Bob'});
+                    var bobTree = _.find(childrenTree, function(x){ return x.name == 'Bob';});
 
-                    var carolTree = _.find(childrenTree, function(x){ return x.name == 'Carol'});
-                    var danTree = _.find(carolTree.children, function(x){ return x.name == 'Dann'});
-                    var emilyTree = _.find(danTree.children, function(x){ return x.name == 'Emily'});
+                    var carolTree = _.find(childrenTree, function(x){ return x.name == 'Carol';});
+                    var danTree = _.find(carolTree.children, function(x){ return x.name == 'Dann';});
+                    var emilyTree = _.find(danTree.children, function(x){ return x.name == 'Emily';});
 
                     bobTree.children.length.should.equal(0);
                     carolTree.children.length.should.equal(1);
@@ -456,8 +514,8 @@ describe('tree tests', function () {
 
                     should.not.exist(err);
 
-                    childrenTree.length.should.equal(2);
-                    childrenTree[0].name.should.equal('Carol');
+                    childrenTree.length.should.equal(3);
+                    childrenTree[0].name.should.equal('Falko');
                     _.map(childrenTree, 'name').should.containEql('Bob').and.containEql('Carol');
 
                     done();
@@ -465,30 +523,6 @@ describe('tree tests', function () {
             });
         });
 
-        it("should return bob's siblings and self", function(done) {
-            User.findOne({ name: 'Bob' }, function(err, bob) {
-                bob.siblingsAndSelf(function(err, siblings) {
-                    should.not.exist(err);
-
-                    siblings.length.should.equal(2);
-                    _.map(siblings, 'name').should.containEql('Bob').and.containEql('Carol');
-
-                    done();
-                });
-            });
-        });
-
-        it("should return bob's siblings without self", function(done) {
-            User.findOne({ name: 'Bob' }, function(err, bob) {
-                bob.siblings(function(err, siblings) {
-                    should.not.exist(err);
-
-                    siblings.length.should.equal(1);
-                    _.map(siblings, 'name').should.containEql('Carol');
-
-                    done();
-                });
-            });
-        });
     });
+
 });

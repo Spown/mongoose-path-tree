@@ -7,7 +7,8 @@
     "Oleg Butovich <obutovich@gmail.com>",
     "Jake Dempsey <angelo0000@gmail.com>",
     "Alban Escalier (DaWyz)",
-    "Spown"
+    "Spown",
+    "Sleede <contact@sleede.com>"
   ],
   "name": "mongoose-path-tree",
   "description": "Maintaied version of materialized path hierarchy for mongoose with reparent option",
@@ -17,22 +18,22 @@
     "url": "git://github.com/swayf/mongoose-path-tree.git"
   },
   "main": "index.js",
-  "version": "1.3.8",
+  "version": "1.4.0",
   "engines": {
-    "node": "0.10 - 5.11.0"
+    "node": ">=0.10 <=7.9.0"
   },
   "dependencies": {
-    "stream-worker": "^2.0.0"
+    "stream-worker": "^2.0.1"
   },
   "devDependencies": {
     "mongoose": "^4.4.12",
     "async": "^2.0.0",
-    "codeclimate-test-reporter": "^0.3.1",
+    "codeclimate-test-reporter": "^0.5.0",
     "istanbul": "^0.4.3",
     "lodash": "^4.11.1",
-    "mocha": "^2.4.5",
+    "mocha": "^4",
     "shortid": "^2.2.6",
-    "should": "^10.0.0"
+    "should": "^13"
   },
   "directories": {
     "test": "test"
@@ -45,7 +46,8 @@
     "materialized",
     "path",
     "tree",
-    "mongodb"
+    "mongodb",
+    "nested"
   ],
   "license": "BSD"
 }
