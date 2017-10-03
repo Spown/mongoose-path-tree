@@ -1,4 +1,5 @@
 var Mongoose = require('mongoose'),
+        conn,
     Tree = require('../lib/tree'),
     Async = require('async'),
     should = require('should'),
@@ -9,10 +10,10 @@ var Mongoose = require('mongoose'),
 if ('undefined' !== typeof Promise) {
     Mongoose.Promise = Promise;
 } 
-Mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/mongoose-path-tree');
+conn = Mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/mongoose-path-tree');
 
 describe('tree tests', function () {
-
+    this.timeout(5000);
     var userSchema = {
         name: String
     };
@@ -525,4 +526,9 @@ describe('tree tests', function () {
 
     });
 
+    after('ending', function (done) {
+        conn.disconnect(function () {
+            done();
+        });
+    });
 });
