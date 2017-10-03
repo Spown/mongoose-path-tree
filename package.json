@@ -20,7 +20,7 @@
   "main": "index.js",
   "version": "1.4.0",
   "engines": {
-    "node": ">=0.10 <=7.9.0"
+    "node": ">=4.4.4 <=7.9.0"
   },
   "dependencies": {
     "stream-worker": "^2.0.1"
