@@ -15,13 +15,14 @@ conn = Mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/mo
 describe('tree tests', function () {
     this.timeout(5000);
     var userSchema = {
-        name: String
-    };
-
-    var pluginOptions = {
-        pathSeparator: '.',
-        treeOrdering: true
-    };
+            name: String
+        },
+        pFN,
+        pluginOptions = {
+            pathSeparator: '.',
+            treeOrdering: (pFN='_position')
+        }
+    ;
 
     if (process.env.MONGOOSE_TREE_SHORTID === '1') {
         userSchema._id = {
@@ -190,10 +191,10 @@ describe('tree tests', function () {
             User.findOne({name: 'Adam'}, function(err, adam) {
                 adam.moveToPosition(1, function(err, adamWithNewPosition) {
                     should.not.exist(err);
-                    adamWithNewPosition.position.should.equal(1);
+                    adamWithNewPosition[pFN].should.equal(1);
 
                     User.findOne({name: 'Eden'}, function(err, eden) {
-                        eden.position.should.equal(0);
+                        eden[pFN].should.equal(0);
                         done();
                     });
                 });
@@ -206,7 +207,7 @@ describe('tree tests', function () {
                   dann.parent = adam;
                   dann.save(function(e, d) {
                       should.not.exist(e);
-                      d.position.should.equal(3);
+                      d[pFN].should.equal(3);
                       done();
                   });
                 });
@@ -412,15 +413,15 @@ describe('tree tests', function () {
                     should.equal(sibs.length, 3, 'should find exactly 3 documents');
                     for (var idx = 0; idx < sibs.length; idx++) {
                         var doc = sibs[idx];
-                        initPositions[doc.position] = doc;
+                        initPositions[doc[pFN]] = doc;
                     }
                     initPositions[initPositions.length-1].moveToPosition(initPositions.length-2, function (err, doc) {
                         if (err) { done(err); }
-                        should.notEqual(initPositions.length-1, doc.position, 'the meved doc\'s position didn\'t chage');
+                        should.notEqual(initPositions.length-1, doc[pFN], 'the meved doc\'s position didn\'t chage');
                         User.findById(initPositions[initPositions.length-2]._id, function (err, doc2) {
                             if (err) { done(err); }
-                            should.notEqual(doc2.position, initPositions.length-2, 'the target doc\'s position didn\'t chage');
-                            should.equal(doc2.position, initPositions.length-1, 'the target doc\'s position didn\'t chage to moved doc\'s position');
+                            should.notEqual(doc2[pFN], initPositions.length-2, 'the target doc\'s position didn\'t chage');
+                            should.equal(doc2[pFN], initPositions.length-1, 'the target doc\'s position didn\'t chage to moved doc\'s position');
                             done();
                         });
                     });
