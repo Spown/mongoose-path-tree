@@ -66,8 +66,12 @@ describe('tree tests', function () {
         },
         'should return an error if "treeOrdering" isn\'t set (promise)': {
             pluginOptions: {}
+        },
+        'should reparent children': {
+            pluginOptions: {
+                onDelete: 'REPARENT'
+            }
         }
-        
     };
 
     function mConnect(prepare, stdPrepare, done) {
@@ -171,6 +175,28 @@ describe('tree tests', function () {
                 });
             });
         });
+
+        it('should reparent children', function (done) {
+            var dansOldParent, carolsParent;
+            User.findOne({ name: 'Dann' }, function (err, dann) {
+                should.not.exist(err);
+                dansOldParent = dann.parent;
+                User.findOne({ name: 'Carol' }, function (err, carol) {
+                    should.not.exist(err);
+                    carolsParent = carol.parent;
+                    carol.remove(function (err) {
+                        should.not.exist(err);
+                        User.find(function (err, users) {
+                            should.not.exist(err);
+                            users.length.should.equal(6);
+                            should.equal( _.find(users, {name: 'Dann'}).parent.toString(), carolsParent.toString());
+                            done();
+                        });
+                    });
+                });
+            }); 
+        });
+
     });
 
 
@@ -197,7 +223,6 @@ describe('tree tests', function () {
             done();
         });
     }
-
 
     describe('moving documents', function () {
 
@@ -333,8 +358,27 @@ describe('tree tests', function () {
 
     describe('get ancestors', function () {
 
-        it('should return ancestors', function (done) {
+        it('should return immidiate parent', function (done) {
+            User.findOne({ 'name': 'Dann' }, function (err, dann) {
+                dann.getParent(function (err, parent) {
+                    should.not.exist(err);
+                    parent.name.should.equal('Carol');
+                    done();
+                });
+            });            
+        });
 
+        it('should return immidiate parent (promise)', function () {
+            return User.findOne({ 'name': 'Dann' })
+            .then(function (dann) {
+                return dann.getParent();
+            })
+            .then(function (parent) {
+                parent.name.should.equal('Carol');
+            });           
+        });
+
+        it('should return ancestors', function (done) {
             User.findOne({ 'name': 'Dann' }, function (err, dann) {
 
                 dann.getAncestors(function (err, ancestors) {
@@ -346,7 +390,6 @@ describe('tree tests', function () {
                 });
             });
         });
-
 
         it('should return ancestors with only name and _id fields', function (done) {
 
@@ -363,7 +406,6 @@ describe('tree tests', function () {
                 });
             });
         });
-
 
         it('should return ancestors sorted on name and without wrappers', function (done) {
 
@@ -530,6 +572,29 @@ describe('tree tests', function () {
             })
             .catch(done);
         });
+
+        it('should not move if the position remains the same', function (done) {
+            var oldPos;
+            User.findOne({ 'name': 'Bob' }, function (err, bob) {
+                should.not.exist(err);
+                bob.moveToPosition(oldPos=bob[pFN], function (err, bob) {
+                    should.not.exist(err);
+                    bob[pFN].should.equal(oldPos);
+                    done();
+                });
+            });
+        });
+
+        it('should not move if the position remains the same (promise)', function () {
+            var oldPos;
+            return User.findOne({ 'name': 'Bob' })
+            .then(function (bob) {
+                return bob.moveToPosition(oldPos=bob[pFN]);
+            })
+            .then(function (bob) {
+                bob[pFN].should.equal(oldPos);
+            });
+        });
     });
 
     describe('get children tree', function () {
@@ -630,6 +695,60 @@ describe('tree tests', function () {
             })
             .then(function (childrenTree) {
                 adamsChildrenTree(childrenTree, done);
+            })
+            .catch(done)
+            ;
+        });
+        it("should ignore exclusion of tree paths through object (promise)", function (done) {
+            User.findOne({ 'name': 'Adam' })
+            .then(function (adam) {
+                var fields = {path: 0, parent: 0, name: 1 };
+                fields[pFN] = 0;
+                return adam.getChildrenTree({fields: fields});
+            })
+            .then(function (childrenTree) {
+                var doc = childrenTree[0];
+                doc.should.properties(['path', 'parent', pFN]);
+                done();
+            })
+            .catch(done)
+            ;
+        });
+        it("should ignore non-clusion of tree paths through object (promise)", function (done) {
+            User.findOne({ 'name': 'Adam' })
+            .then(function (adam) {
+                return adam.getChildrenTree({fields: {name: 1}});
+            })
+            .then(function (childrenTree) {
+                var doc = childrenTree[0];
+                doc.should.properties(['path', 'parent', pFN]);
+                done();
+            })
+            .catch(done)
+            ;
+        });
+        it("should ignore exclusion of tree paths through string (promise)", function (done) {
+            User.findOne({ 'name': 'Adam' })
+            .then(function (adam) {
+                return adam.getChildrenTree({fields: '+name -path -parent -'+pFN});
+            })
+            .then(function (childrenTree) {
+                var doc = childrenTree[0];
+                doc.should.properties(['path', 'parent', pFN]);
+                done();
+            })
+            .catch(done)
+            ;
+        });
+        it("should ignore non-inclusion of tree paths through string (promise)", function (done) {
+            User.findOne({ 'name': 'Adam' })
+            .then(function (adam) {
+                return adam.getChildrenTree({fields: '+name'});
+            })
+            .then(function (childrenTree) {
+                var doc = childrenTree[0];
+                doc.should.properties(['path', 'parent', pFN]);
+                done();
             })
             .catch(done)
             ;
