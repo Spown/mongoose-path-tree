@@ -52,10 +52,10 @@ describe('tree tests', function () {
                             carol = new User({name: 'Carol', parent: adam }),
                                 dann = new User({name: 'Dann', parent: carol }),
                                     emily = new User({name: 'Emily', parent: dann }),
-                            falko = new User({name: 'Falko', parent: adam }),
+                            caruso = new User({name: 'Caruso', parent: adam }),
                         eden = new User({name: 'Eden' })
                     ;
-                    Async.forEachSeries([adam, bob, carol, falko, dann, emily, eden], function (doc, cb) {
+                    Async.forEachSeries([adam, bob, carol, caruso, dann, emily, eden], function (doc, cb) {
                         doc.save(cb);
                     }, done);
                 });
@@ -433,7 +433,7 @@ describe('tree tests', function () {
                     if (err) { done(err); }
                     should.equal(sibs.length, 2, 'should find exactly 2 sibling document');
                     should.equal(sibs[0].name, 'Carol', 'wrong sibling');
-                    should.equal(sibs[1].name, 'Falko', 'wrong sibling');
+                    should.equal(sibs[1].name, 'Caruso', 'wrong sibling');
                     done();
                 });
             });
@@ -447,7 +447,7 @@ describe('tree tests', function () {
             .then(function (sibs) {
                 should.equal(sibs.length, 2, 'should find exactly 2 sibling document');
                 should.equal(sibs[0].name, 'Carol', 'wrong sibling');
-                should.equal(sibs[1].name, 'Falko', 'wrong sibling');
+                should.equal(sibs[1].name, 'Caruso', 'wrong sibling');
             })
             ;
         });
@@ -458,7 +458,7 @@ describe('tree tests', function () {
                 bob.getSiblingsAndSelf(function (err, sibs) {
                     if (err) { done(err); }
                     should.equal(sibs.length, 3, 'should find exactly 3 documents');
-                    sibs.should.matchEach(function(doc) { doc.name.should.match(/^(Bob|Carol|Falko)$/); });
+                    sibs.should.matchEach(function(doc) { doc.name.should.match(/^(Bob|Carol|Caruso)$/); });
                     done();
                 });
             });
@@ -658,7 +658,7 @@ describe('tree tests', function () {
                 var adamTree = _.find(childrenTree, function(x){ return x.name == 'Adam';});
 
                 adamTree.children.length.should.equal(3);
-                adamTree.children[0].name.should.equal('Falko');
+                adamTree.children[0].name.should.equal('Caruso');
                 _.map(adamTree.children, 'name').should.containEql('Bob').and.containEql('Carol');
 
                 done();
@@ -762,7 +762,7 @@ describe('tree tests', function () {
                     should.not.exist(err);
 
                     childrenTree.length.should.equal(3);
-                    childrenTree[0].name.should.equal('Falko');
+                    childrenTree[0].name.should.equal('Caruso');
                     _.map(childrenTree, 'name').should.containEql('Bob').and.containEql('Carol');
 
                     done();
