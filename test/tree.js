@@ -714,7 +714,7 @@ describe('tree tests', function () {
             .catch(done)
             ;
         });
-        it("should ignore non-clusion of tree paths through object (promise)", function (done) {
+        it("should ignore non-inclusion of tree paths through object (promise)", function (done) {
             User.findOne({ 'name': 'Adam' })
             .then(function (adam) {
                 return adam.getChildrenTree({fields: {name: 1}});
